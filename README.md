@@ -32,3 +32,9 @@ Safety
 ------
 
 Although no unsafe used is present in the `minisudo` crate’s code itself, its dependencies call functions in PAM and libc, so the project can never be entirely free of unsafe code.
+
+
+Licence
+-------
+
+minisudo’s source code is under the [MIT Licence](LICENCE).
