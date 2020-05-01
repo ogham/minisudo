@@ -3,6 +3,10 @@ use std::os::unix::process::CommandExt;
 use std::process::{Command, exit};
 
 
+/// Name of the PAM config file specified in `/etc/pam.d`.
+static PAM_NAME: &str = "minisudo";
+
+
 fn main() {
 
     // Look up current user
@@ -30,7 +34,7 @@ fn main() {
     let password = rpassword::read_password_from_tty(Some(&message)).expect("No password");
 
     // Authenticate them using PAM
-    let mut authenticator = pam::Authenticator::with_password("minisudo").expect("No authenticator");
+    let mut authenticator = pam::Authenticator::with_password(PAM_NAME).expect("No authenticator");
     authenticator.get_handler().set_credentials(username, password);
     if let Err(e) = authenticator.authenticate() {
         eprintln!("Authentication failed: {}", e);
