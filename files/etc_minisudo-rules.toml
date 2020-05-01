@@ -1,0 +1,4 @@
+# The user ‘ben’ can run any program.
+[[rule]]
+user = "ben"
+program = "*"

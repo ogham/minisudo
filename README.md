@@ -30,6 +30,21 @@ minisudo uses [PAM](https://en.wikipedia.org/wiki/Pluggable_authentication_modul
 The binary is installed with the [setuid bit](https://en.wikipedia.org/wiki/Setuid) set, which is how it’s able to run programs as root.
 
 
+Rules file
+----------
+
+The rules for which users can run which programs are specified in a TOML file, `/etc/minisudo-rules.toml`. Here’s an example:
+
+```toml
+# The user ‘ben’ can run ‘ls’, but nothing else.
+[[rule]]
+user = "ben"
+program = "/bin/ls"
+```
+
+Binaries must be specified by their _full path_, not just their basename. Specify `*` to allow any program to be run.
+
+
 Safety
 ------
 
