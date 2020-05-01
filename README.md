@@ -25,11 +25,13 @@ To uninstall:
 
     $ sudo just uninstall
 
+Debian users will need to have the `libpam0g-dev` package installed.
+
 
 How it works
 ------------
 
-minisudo uses [PAM](https://en.wikipedia.org/wiki/Pluggable_authentication_module) as its authentication mechanism, which is how it knows what your password is.
+minisudo uses [PAM](https://en.wikipedia.org/wiki/Pluggable_authentication_module) as its authentication mechanism, which is how it knows what your password is. It installs a file into `/etc/pam.d` to allow it to do this.
 
 The binary is installed with the [setuid bit](https://en.wikipedia.org/wiki/Setuid) set, which is how it’s able to run programs as root.
 
@@ -52,7 +54,13 @@ Binaries must be specified by their _full path_, not just their basename. Specif
 Safety
 ------
 
-Although no unsafe used is present in the `minisudo` crate’s code itself, its dependencies call functions in PAM and libc, so the project can never be _entirely_ free of unsafe code.
+Although no unsafe Rust code is present in the `minisudo` crate itself, its dependencies call functions in PAM and libc, so the project can never be _entirely_ free of unsafe code.
+
+
+Security vulnerabilities
+------------------------
+
+Probably.
 
 
 Licence
