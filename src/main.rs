@@ -1,3 +1,11 @@
+#![warn(future_incompatible)]
+#![warn(nonstandard_style)]
+#![warn(rust_2018_compatibility)]
+#![warn(rust_2018_idioms)]
+#![warn(unused)]
+
+#![deny(unsafe_code)]
+
 use std::env::args_os;
 use std::fs;
 use std::os::unix::process::CommandExt;
