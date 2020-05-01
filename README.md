@@ -1,5 +1,4 @@
-minisudo
-========
+# minisudo [![Build status](https://travis-ci.org/ogham/minisudo.svg)](https://travis-ci.org/ogham/minisudo)
 
 This is a small sudo-like privilege escalator for Unix-like operating systems. It was written for learning, not to replace sudo.
 
@@ -13,7 +12,7 @@ root
 Installation
 ------------
 
-minisudo is written in [Rust](https://www.rust-lang.org), and uses [just](https://github.com/casey/just) as its command runner. To build and install:
+minisudo is written in [Rust](https://www.rust-lang.org), and uses [just](https://github.com/casey/just) as its build script runner. To build and install:
 
     $ just build
     $ sudo just install
