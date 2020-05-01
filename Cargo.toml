@@ -1,8 +1,14 @@
 [package]
 name = "minisudo"
-version = "0.1.0"
+description = "A little privilege escalator, for learning"
+
 authors = ["Benjamin Sago <ogham@bsago.me>"]
 edition = "2018"
+exclude = ["/files/*", "Justfile", "LICENCE", "/README.md"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/ogham/minisudo"
+version = "0.1.0"
 
 [dependencies]
 pam = "0.7"

@@ -1,14 +1,16 @@
 # minisudo [![Build status](https://travis-ci.org/ogham/minisudo.svg)](https://travis-ci.org/ogham/minisudo)
 
-This is a small sudo-like privilege escalator for Unix-like operating systems. It was written for learning, not to replace sudo.
+This is a small sudo-like privilege escalator for Unix-like operating systems.
 
-It’s been tested on macOS and Linux.
+It was written for learning, not to replace sudo, and has been tested on macOS and Linux.
 
 ```
 $ minisudo whoami
 Password for "ben": [password hidden]
 root
 ```
+
+This project was inspired by [kibi](https://github.com/ilai-deutel/kibi), a text editor written in ≤1024 lines of code. I’ve seen many people with the false impression that `sudo` is “magical” or special in some way, but it doesn’t do anything that’s not available to any other program. minisudo tries to implement its most popular use case — running programs as root after checking against a list of rules — with a couple pages of code and minimal dependencies.
 
 
 Installation
