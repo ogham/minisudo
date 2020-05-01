@@ -1,0 +1,11 @@
+[package]
+name = "minisudo"
+version = "0.1.0"
+authors = ["Benjamin Sago <ogham@bsago.me>"]
+edition = "2018"
+
+[dependencies]
+pam = "0.7"
+rpassword = "4.0"
+users = "0.8"
+which = { version = "3.1", default-features = false }
