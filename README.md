@@ -2,6 +2,8 @@
 
 This is a small sudo-like privilege escalator for Unix-like operating systems. It was written for learning, not to replace sudo.
 
+It’s been tested on macOS and Linux.
+
 ```
 $ minisudo whoami
 Password for "ben": [password hidden]
