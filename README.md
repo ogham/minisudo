@@ -12,7 +12,7 @@ root
 Installation
 ------------
 
-minisudo is written in [Rust](https://www.rust-lang.org), and uses [just](https://github.com/casey/just) as its build script runner. To build and install:
+minisudo is written in [Rust](https://www.rust-lang.org/), and uses [just](https://github.com/casey/just) as its build script runner. To build and install:
 
     $ just build
     $ sudo just install
@@ -25,13 +25,15 @@ To uninstall:
 How it works
 ------------
 
-minisudo uses [PAM](https://en.wikipedia.org/wiki/Pluggable_authentication_module) as its authentication mechanism.
+minisudo uses [PAM](https://en.wikipedia.org/wiki/Pluggable_authentication_module) as its authentication mechanism, which is how it knows what your password is.
+
+The binary is installed with the [setuid bit](https://en.wikipedia.org/wiki/Setuid) set, which is how it’s able to run programs as root.
 
 
 Safety
 ------
 
-Although no unsafe used is present in the `minisudo` crate’s code itself, its dependencies call functions in PAM and libc, so the project can never be entirely free of unsafe code.
+Although no unsafe used is present in the `minisudo` crate’s code itself, its dependencies call functions in PAM and libc, so the project can never be _entirely_ free of unsafe code.
 
 
 Licence
