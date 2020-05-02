@@ -9,7 +9,7 @@
 use std::env::{args_os, current_dir, var};
 use std::ffi::OsStr;
 use std::fs;
-use std::os::unix::process::CommandExt;
+use std::os::unix::{fs::PermissionsExt, process::CommandExt};
 use std::path::{Path, PathBuf};
 use std::process::{Command, exit};
 
@@ -102,11 +102,15 @@ fn lookup_binary(binary_basename: &OsStr) -> PathBuf {
 
     // Otherwise, search through every directory in the `PATH`
     // environment variable to find the absolute path of the binary.
+    // This variable is user-controlled, so be very careful about which
+    // files are deemed acceptable.
     for pathlet in var("PATH").expect("no $PATH").split(':') {
         let mut potential_path = PathBuf::from(pathlet);
         potential_path.push(binary_basename);
 
-        if potential_path.exists() {
+        if potential_path.exists()
+        && potential_path.metadata().map_or(false, |m| m.permissions().mode() & 0o111 != 0)
+        {
             return potential_path;
         }
     }
