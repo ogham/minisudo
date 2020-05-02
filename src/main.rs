@@ -10,7 +10,7 @@ use std::env::{var, args_os};
 use std::ffi::OsStr;
 use std::fs;
 use std::os::unix::process::CommandExt;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, exit};
 
 use serde::Deserialize;
@@ -53,7 +53,7 @@ fn main() {
     };
 
     // Make sure the rules say it’s OK for this user to run this program
-    if ! config.test(username, binary.to_str().unwrap()) {
+    if ! config.test(username, &binary) {
         eprintln!("minisudo: User {} is not allowed to run {}.", username, binary.display());
         eprintln!("This incident will be reported.");  // not really
         exit(1);
@@ -122,8 +122,8 @@ impl Config {
     }
 
     /// Tests whether the given user and program
-    pub fn test(&self, user: &str, program: &str) -> bool {
+    pub fn test(&self, user: &str, program: &Path) -> bool {
         self.rule.iter()
-            .any(|r| r.user == user && (r.program == "*" || r.program == program))
+            .any(|r| r.user == user && (r.program == "*" || &*r.program == program.as_os_str()))
     }
 }
