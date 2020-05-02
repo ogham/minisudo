@@ -6,7 +6,7 @@
 
 #![deny(unsafe_code)]
 
-use std::env::{var, args_os};
+use std::env::{args_os, current_dir, var};
 use std::ffi::OsStr;
 use std::fs;
 use std::os::unix::process::CommandExt;
@@ -37,17 +37,9 @@ fn main() {
     }
 
     // Look up the full path of the program in the first argument.
-    // We need this to check against the path given in the rules file,
+    // We need this to check against the path given in the config file,
     // and also because exec requires the full path, not just the name.
-    let binary = match which(&args[0]) {
-        Some(b) => {
-            b
-        }
-        None => {
-            eprintln!("minisudo: No such command {:?}", &args[0]);
-            exit(1);
-        }
-    };
+    let binary = lookup_binary(&args[0]);
 
     // Make sure the rules say it’s OK for this user to run this program
     let user = current_user().expect("No current user");
@@ -89,19 +81,39 @@ fn current_user() -> Option<User> {
 }
 
 
-/// Finds the binary with the given name that gets run, by searching the
-/// `PATH` environment variable, returning None if no binary is found.
-fn which(binary_basename: &OsStr) -> Option<PathBuf> {
+/// Turns the binary the user is trying to run, which could be a
+/// basename like `ls`, an absolute path such as `/usr/bin/ls`, or a
+/// relative path such as `./ls`, into an absolute path.
+fn lookup_binary(binary_basename: &OsStr) -> PathBuf {
+    let input_path = PathBuf::from(binary_basename);
+
+    // If the path is absolute, we already have the full path.
+    if input_path.is_absolute() {
+        return input_path;
+    }
+
+    // If the path is relative and has more than one component, then
+    // create the full path relative to where we are now.
+    if input_path.components().count() > 1 {
+        let mut path = current_dir().expect("No current directory");
+        path.push(input_path);
+        return path;
+    }
+
+    // Otherwise, search through every directory in the `PATH`
+    // environment variable to find the absolute path of the binary.
     for pathlet in var("PATH").expect("no $PATH").split(':') {
         let mut potential_path = PathBuf::from(pathlet);
         potential_path.push(binary_basename);
 
         if potential_path.exists() {
-            return Some(potential_path);
+            return potential_path;
         }
     }
 
-    None
+    // If the code above can’t find one, then there is no such program.
+    eprintln!("minisudo: No such command {}", input_path.display());
+    exit(1);
 }
 
 
