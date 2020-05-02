@@ -6,9 +6,11 @@
 
 #![deny(unsafe_code)]
 
-use std::env::args_os;
+use std::env::{var, args_os};
+use std::ffi::OsStr;
 use std::fs;
 use std::os::unix::process::CommandExt;
+use std::path::PathBuf;
 use std::process::{Command, exit};
 
 use serde::Deserialize;
@@ -37,13 +39,17 @@ fn main() {
         exit(2);
     }
 
-    // Look up the full path of the program in the first argument
-    let binary = match which::which(&args[0]) {
-        Ok(c) => c,
-        Err(e) => {
-            eprintln!("No such command {:?}: {}", &args[0], e);
+    // Look up the full path of the program in the first argument.
+    // We need this to check against the path given in the rules file,
+    // and also because exec requires the full path, not just the name.
+    let binary = match which(&args[0]) {
+        Some(b) => {
+            b
+        }
+        None => {
+            eprintln!("No such command {:?}", &args[0]);
             exit(1);
-        },
+        }
     };
 
     // Make sure the rules say it’s OK for this user to run this program
@@ -75,6 +81,22 @@ fn main() {
     // If you get here the command didn’t work, so print the error.
     eprintln!("Error running program: {}", error);
     exit(1);
+}
+
+
+/// Finds the binary with the given name that gets run, by searching the
+/// `PATH` environment variable, returning None if no binary is found.
+fn which(binary_basename: &OsStr) -> Option<PathBuf> {
+    for pathlet in var("PATH").expect("no $PATH").split(':') {
+        let mut potential_path = PathBuf::from(pathlet);
+        potential_path.push(binary_basename);
+
+        if potential_path.exists() {
+            return Some(potential_path);
+        }
+    }
+
+    None
 }
 
 
