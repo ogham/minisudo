@@ -51,7 +51,7 @@ fn main() {
     }
 
     // Have the user enter a password
-    let message = format!("Password for {:?}: ", user.name());
+    let message = format!("Password for {}: ", username);
     let password = rpassword::read_password_from_tty(Some(&message)).expect("No password");
 
     // Authenticate them using PAM

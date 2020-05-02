@@ -6,7 +6,7 @@ It was written for learning, not to replace sudo, and has been tested on macOS a
 
 ```
 $ minisudo whoami
-Password for "ben": [password hidden]
+Password for ben: [password hidden]
 root
 ```
 
