@@ -46,6 +46,11 @@ The rules for which users can run which programs are specified in a TOML file, `
 [[rule]]
 user = "ben"
 program = "/bin/ls"
+
+# All members of the ‘staff’ group can run ‘whoami’, but nothing else.
+[[rule]]
+group = "staff"
+program = "/usr/bin/whoami"
 ```
 
 Binaries must be specified by their _full path_, not just their basename. Specify `*` to allow any program to be run.

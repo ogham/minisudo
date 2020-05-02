@@ -14,6 +14,7 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, exit};
 
 use serde::Deserialize;
+use users::User;
 
 
 /// Name of the PAM config file specified in `/etc/pam.d`.
@@ -24,10 +25,6 @@ static CONFIG_PATH: &str = "/etc/minisudo-rules.toml";
 
 
 fn main() {
-
-    // Look up current user
-    let user = users::get_user_by_uid(users::get_current_uid()).expect("No current user");
-    let username = user.name().to_str().expect("Non-UTF8 username");
 
     // Load rules from the config file
     let config = Config::load_from_file();
@@ -53,8 +50,10 @@ fn main() {
     };
 
     // Make sure the rules say it’s OK for this user to run this program
-    if ! config.test(username, &binary) {
-        eprintln!("minisudo: User {} is not allowed to run {}.", username, binary.display());
+    let user = current_user().expect("No current user");
+    let username = user.name().to_str().expect("Non-UTF8 username");
+    if ! config.test(&user, &binary) {
+        eprintln!("minisudo: User {:?} is not allowed to run {}.", username, binary.display());
         eprintln!("This incident will be reported.");  // not really
         exit(1);
     }
@@ -84,6 +83,12 @@ fn main() {
 }
 
 
+/// Looks up the current user by their ID.
+fn current_user() -> Option<User> {
+    users::get_user_by_uid(users::get_current_uid())
+}
+
+
 /// Finds the binary with the given name that gets run, by searching the
 /// `PATH` environment variable, returning None if no binary is found.
 fn which(binary_basename: &OsStr) -> Option<PathBuf> {
@@ -103,27 +108,52 @@ fn which(binary_basename: &OsStr) -> Option<PathBuf> {
 /// The root type for the config file.
 #[derive(PartialEq, Debug, Deserialize)]
 struct Config {
-    rule: Vec<Rule>,
+    #[serde(rename = "rule")]
+    rules: Vec<Rule>,
 }
 
 /// One of the rules specified in the config file.
 #[derive(PartialEq, Debug, Deserialize)]
 struct Rule {
-    user: String,
+    #[serde(flatten)]
+    matcher: Matcher,
     program: String,
+}
+
+/// The specification for which user or group this rule applies to.
+#[derive(PartialEq, Debug, Deserialize)]
+#[serde(untagged)]
+enum Matcher {
+    UserByName { user: String },
+    GroupByName { group: String },
 }
 
 impl Config {
 
     /// Load all the rules from the config file.
-    pub fn load_from_file() -> Self {
+    fn load_from_file() -> Self {
         let file = fs::read_to_string(CONFIG_PATH).expect("No rules");
         toml::from_str(&file).expect("Bad parse")
     }
 
-    /// Tests whether the given user and program
-    pub fn test(&self, user: &str, program: &Path) -> bool {
-        self.rule.iter()
-            .any(|r| r.user == user && (r.program == "*" || &*r.program == program.as_os_str()))
+    /// Tests whether the rule lets the user run the program.
+    fn test(&self, user: &User, program: &Path) -> bool {
+        self.rules.iter()
+            .any(|r| r.matcher.test(user) && (r.program == "*" || &*r.program == program.as_os_str()))
+    }
+}
+
+impl Matcher {
+
+    /// Tests whether this matcher is for the given user.
+    fn test(&self, user: &User) -> bool {
+        match self {
+            Self::UserByName { user: username } => {
+                user.name() == &**username
+            }
+            Self::GroupByName { group: groupname } => {
+                user.groups().iter().flatten().any(|g| g.name() == &**groupname)
+            }
+        }
     }
 }
