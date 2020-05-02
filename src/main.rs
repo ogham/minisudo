@@ -47,14 +47,14 @@ fn main() {
             b
         }
         None => {
-            eprintln!("No such command {:?}", &args[0]);
+            eprintln!("minisudo: No such command {:?}", &args[0]);
             exit(1);
         }
     };
 
     // Make sure the rules say it’s OK for this user to run this program
     if ! config.test(username, binary.to_str().unwrap()) {
-        eprintln!("User {} is not allowed to run {}", username, binary.display());
+        eprintln!("minisudo: User {} is not allowed to run {}.", username, binary.display());
         eprintln!("This incident will be reported.");  // not really
         exit(1);
     }
@@ -67,7 +67,7 @@ fn main() {
     let mut authenticator = pam::Authenticator::with_password(PAM_NAME).expect("No authenticator");
     authenticator.get_handler().set_credentials(username, password);
     if let Err(e) = authenticator.authenticate() {
-        eprintln!("Authentication failed: {}", e);
+        eprintln!("minisudo: Authentication failed: {}", e);
         exit(1);
     }
 
@@ -79,7 +79,7 @@ fn main() {
         .exec();
 
     // If you get here the command didn’t work, so print the error.
-    eprintln!("Error running program: {}", error);
+    eprintln!("minisudo: Error running program: {}", error);
     exit(1);
 }
 
